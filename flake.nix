@@ -1,33 +1,40 @@
 {
-  description = "NixOS Home Manager Flake 260307";
+  description = "NixOS configuration";
 
   inputs = {
-    # Use the unstable branch for packages
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    
-    # Home Manager input
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    # home-manager, used for managing user configuration
+    home-manager = {
+      url = "github:nix-community/home-manager/release-25.11";
+      # The `follows` keyword in inputs is used for inheritance.
+      # Here, `inputs.nixpkgs` of home-manager is kept consistent with
+      # the `inputs.nixpkgs` of the current flake,
+      # to avoid problems caused by different versions of nixpkgs.
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
-    let
-      system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
-    in {
-      nixosConfigurations.my-nixos = nixpkgs.lib.nixosSystem {
-        inherit system;
+  outputs = inputs@{ nixpkgs, home-manager, ... }: {
+    nixosConfigurations = {
+      # TODO please change the hostname to your own
+      my-nixos = nixpkgs.lib.nixosSystem {
         modules = [
-          ./configuration.nix # Your system configuration
-          
-          # Home Manager module
+          ./configuration.nix
+
+          # make home-manager as a module of nixos
+          # so that home-manager configuration will be deployed automatically when executing `nixos-rebuild switch`
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.myuser = import ./home.nix; # User config
+
+            # TODO replace ryan with your own username
+            home-manager.users.ryan = import ./home.nix;
+
+            # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix
           }
         ];
       };
     };
+  };
 }
