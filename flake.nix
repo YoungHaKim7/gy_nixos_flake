@@ -28,8 +28,8 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
 
-            # TODO replace ryan with your own username
-            home-manager.users.ryan = import ./home.nix;
+            # TODO replace gy with your own username
+            home-manager.users.gy = import ./home.nix;
 
             # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix
           }
